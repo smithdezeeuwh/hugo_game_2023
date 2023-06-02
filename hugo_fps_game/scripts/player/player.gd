@@ -20,7 +20,10 @@ const MOUSE_SENSITIVITY: float = 0.002
 const CAMERA_UPPER_CLAMP: float = 90.0 # These two are later converted to radians.
 const CAMERA_LOWER_CLAMP: float = -90.0
 
+
 enum MovementStates{ON_GROUND, IN_AIR}
+
+const reach_ray_length = 5
 
 # Camera.
 var mouse_rotation := Vector3.ZERO
@@ -28,6 +31,11 @@ var camera_upper_clamp_rad: float # These two are the ones used to clamp the ver
 var camera_lower_clamp_rad: float # They get their values in radians in _ready().
 @export var camera_position_offset := Vector3(0, 1.8, 0)
 var camera_effect_offset := Vector3.ZERO
+var camera_FOV: float = 80
+var camera_recoil_x: float = 0 
+var camera_recoil_y: float = 0 
+var camera_FOV_clamp: int = 100
+
 #@onready var tween := create_tween()
 
 # Movement.
@@ -38,6 +46,7 @@ var original_horizontal_velocity := Vector3() # Used for preserving momentum whe
 var direction := Vector3.ZERO
 var gravity_vector := Vector3.ZERO
 var current_collider_height: float = 1.8 # Used for shrinking the collider when crouching.
+var CROUCH_SLIDE_MULTIPLIER: float = 1.2
 
 # Movement flags.
 var is_grounded: bool = false
@@ -45,14 +54,19 @@ var can_jump: bool = false
 var is_momentum_preserved: bool = false
 var is_head_bonked: bool = false
 var offset_velocity := Vector3.ZERO
+var ready_to_crouch_slide: bool = false
+var is_sprinting: bool 
+var is_crouchsliding: bool 
+
 
 @onready var camera: Camera3D = $Camera3D
 @onready var collider: CollisionShape3D = $CollisionShape3D
 @onready var ui = $PlayerUI
 @onready var item_manager = $Camera3D/Hands
-#@onready var raycast = $Camera3D/RayCast3D
+@onready var raycast = $Camera3D/RayCast3D
 
 func _ready() -> void:
+	
 	camera.current = true
 	
 	EventBus.projectile_fired.connect(_on_projectile_fired) # For recoil and stuff.
@@ -68,6 +82,22 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	process_camera_position()
+	
+	if item_manager.is_ads():
+		#camera_FOV = lerp(camera_FOV, 60, 0.5 *  _delta)
+		print("befoire " + str(camera_FOV))
+		camera_FOV = lerp(camera_FOV, 50.0, delta * 2)
+	if is_sprinting == true:
+		camera_FOV = lerp(camera_FOV, 100.0, delta * 2)
+	if is_crouchsliding == true :
+		pass
+	else:
+		camera_FOV = lerp(camera_FOV, 90.0, delta * 2)
+	
+	print("after " + str(camera_FOV))
+	camera.set_fov(camera_FOV)
+		
+	camera_FOV = clamp(camera_FOV, 0, 100)
 	#print("cap" + str(tween.is_running()))
 
 func _input(event: InputEvent) -> void:
@@ -75,6 +105,7 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion:
 		var relative_mouse_motion: Vector2 = event.relative
 		process_camera_rotation(relative_mouse_motion)
+		
 	
 	# Which way we are going to move.
 	direction = Vector3()
@@ -113,14 +144,29 @@ func handle_input() -> void:
 	
 	if Input.is_action_just_pressed("reload"):
 		item_manager.request_action("reload")
+		
+	if Input.is_action_just_pressed("primary"):
+		item_manager.equip_primary()
+		
 
+	if Input.is_action_just_pressed("secondary"):
+		item_manager.equip_secondary()
+		
+	if Input.is_action_just_pressed("melee"):
+		item_manager.equip_melee()
+
+		
+	
 func _physics_process(delta: float) -> void:
+	item_manager.check_item_pickup(raycast)
 	
 	handle_input()
 	
 	check_movement_flags()
 	handle_crouching()
 	process_movement_state(delta)
+	
+	ui.update_speed(horizontal_velocity)
 
 func check_movement_flags() -> void:
 	if is_on_floor():
@@ -158,7 +204,7 @@ func process_movement_state(delta) -> void:
 		MovementStates.IN_AIR:
 			air_move(delta)
 
-func ground_move(delta) -> void:
+func ground_move(delta: float) -> void:
 	is_momentum_preserved = false
 	
 	# Stick to slopes and stuff.
@@ -168,19 +214,32 @@ func ground_move(delta) -> void:
 		# TODO: reset momentum somehow
 		jump()
 	
-	# Determine if we are sprinting, walking or crouching.
-	if Input.is_action_pressed("sprint"):
+	var sprinting = Input.is_action_pressed("sprint")
+	var crouching = Input.is_action_pressed("crouch")
+	
+	if not crouchin_sliding():
+		is_crouchsliding = false
+		CROUCH_SLIDE_MULTIPLIER = 1.2
+		#camera_FOV = 90
+	
+	if sprinting:
 		horizontal_velocity = horizontal_velocity.lerp(
 				direction * (WALK_SPEED * SPRINT_MULTIPLIER),
 				REGULAR_ACCELERATION * delta) # TODO: is delta frame-independent?
-	# Regular movement / walking.
+		is_sprinting = true
+		
+		if crouchin_sliding():
+			is_crouchsliding = true 
+			horizontal_velocity *= CROUCH_SLIDE_MULTIPLIER
+			if CROUCH_SLIDE_MULTIPLIER > 0:
+				CROUCH_SLIDE_MULTIPLIER -= 0.005
+				camera_FOV += 1
+			
 	else:
+		is_sprinting = false
 		horizontal_velocity = horizontal_velocity.lerp(
 				direction * WALK_SPEED,
 				REGULAR_ACCELERATION * delta)
-	if Input.is_action_pressed("crouch"):
-		#is_crouching = true
-		horizontal_velocity = horizontal_velocity * CROUCH_MULTIPLIER
 	
 	# Velocity vector calculated from horizontal direction and gravity.
 	velocity.z = horizontal_velocity.z + gravity_vector.z
@@ -188,6 +247,44 @@ func ground_move(delta) -> void:
 	velocity.y = gravity_vector.y
 	
 	move_and_slide()
+
+func wait(t):
+	await get_tree().create_timer(t).timeout
+	
+
+#to reset to make sure you dont crouch to crouch sldie
+func can_crouch_slide():
+	if Input.is_action_pressed("crouch") and not Input.is_action_pressed("sprint"):
+		ready_to_crouch_slide = false
+		
+
+func crouchin_sliding():
+	if Input.is_action_pressed("crouch") and Input.is_action_pressed("sprint"):
+		return true
+#	var temp_var = false
+#	if Input.is_action_pressed("sprint") and not Input.is_action_pressed("crouch"):
+#		temp_var = ready_to_crouch_slide
+#		if temp_var == ready_to_crouch_slide:
+#			print("pass")
+#			if Input.is_action_pressed("sprint") and Input.is_action_pressed("crouch"):
+#				print("return true")
+#				return true
+
+func handle_crouching() -> void:
+	
+	# Change colliders when crouching TODO explain
+	# Head movement is 
+	if Input.is_action_pressed("crouch") or is_head_bonked:
+		current_collider_height -= CROUCH_TRANSITION_SPEED
+		#head.translation = head.translation.linear_interpolate(Vector3(0, 1.25, 0), CROUCH_TRANSITION_SPEED)
+	else:
+		current_collider_height += CROUCH_TRANSITION_SPEED
+		#head.translation = head.translation.linear_interpolate(Vector3(0, 1.8, 0), CROUCH_TRANSITION_SPEED)
+	
+	# Crouch and regular height determine the shortest and highest we can stand, respectively.
+	current_collider_height = clamp(current_collider_height, COLLIDER_CROUCH_HEIGHT, COLLIDER_REGULAR_HEIGHT)
+	
+	collider.shape.height = current_collider_height
 
 func air_move(delta) -> void:
 	gravity_vector += Vector3.DOWN * GRAVITY * (delta / 2) # Fall to the ground.
@@ -221,21 +318,11 @@ func air_move(delta) -> void:
 	
 	move_and_slide()
 
-func handle_crouching() -> void:
-	
-	# Change colliders when crouching TODO explain
-	# Head movement is 
-	if Input.is_action_pressed("crouch") or is_head_bonked:
-		current_collider_height -= CROUCH_TRANSITION_SPEED
-		#head.translation = head.translation.linear_interpolate(Vector3(0, 1.25, 0), CROUCH_TRANSITION_SPEED)
-	else:
-		current_collider_height += CROUCH_TRANSITION_SPEED
-		#head.translation = head.translation.linear_interpolate(Vector3(0, 1.8, 0), CROUCH_TRANSITION_SPEED)
-	
-	# Crouch and regular height determine the shortest and highest we can stand, respectively.
-	current_collider_height = clamp(current_collider_height, COLLIDER_CROUCH_HEIGHT, COLLIDER_REGULAR_HEIGHT)
-	
-	collider.shape.height = current_collider_height
+
+			
+
+
+
 
 func jump():
 	gravity_vector = Vector3.UP * JUMP_VELOCITY
@@ -248,18 +335,33 @@ func clamp_vector(vector: Vector3, clamp_length: float) -> Vector3:
 	return vector * (clamp_length / vector.length())
 
 func _on_projectile_fired(item_data, projectile_transform):
-	print("cap")
-	
+	print("shoot")
 	ui.update_ammo(item_data)
+	
+	#methond 2 recoil
+	
+	item_manager.fire_recoil()
+	
+	#method 1 recoil
 	# TODO: add recoil and camera shake and stuff!
 	#camera_effect_offset += Vector3(0, randf_range(0, .3), randf_range(-.3, .3))
 	#var tween = create_tween().set_parallel(true)
 	#tween.tween_property(self, "camera_effect_offset", Vector3.ZERO, 0.2).from_current()
-	
-	
 	#camera_position_offset += Vector3(0,0.01,0)
 	#camera.translate(Vector3(0,0.1,0.01))
 	#item_manager.translate(Vector3(0,0.01,0))
+	
+	#methond 3 recoil
+	#camera_recoil_x += 0.05
+	#camera_recoil_y += 0
+	#wait(0.05)
+	#camera_recoil_x += 0.0
+	#camera_recoil_y += 0.0
+	
+	
+
+
+
 
 func _on_player_reloaded(item_data):
 	ui.update_ammo(item_data)

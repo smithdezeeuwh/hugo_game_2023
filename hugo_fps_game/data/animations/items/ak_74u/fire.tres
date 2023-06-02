@@ -1,0 +1,68 @@
+[gd_resource type="Animation" format=3 uid="uid://cvjq02xhoircg"]
+
+[resource]
+resource_name = "fire"
+length = 0.0833333
+tracks/0/type = "position_3d"
+tracks/0/imported = true
+tracks/0/enabled = true
+tracks/0/path = NodePath("Armature/Skeleton3D:bolt")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = PackedFloat32Array(0, 1, -0.0151787, -0.116463, -1.8887e-08, 0.0333333, 1, -0.0151787, -0.242911, -5.45618e-08, 0.0666667, 1, -0.0151787, -0.149246, -5.45618e-08, 0.0833333, 1, -0.0151787, -0.116463, -1.8887e-08)
+tracks/1/type = "position_3d"
+tracks/1/imported = true
+tracks/1/enabled = true
+tracks/1/path = NodePath("Armature/Skeleton3D:body")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = PackedFloat32Array(0, 1, 5.54851e-09, 0.068854, -0.0737047)
+tracks/2/type = "rotation_3d"
+tracks/2/imported = true
+tracks/2/enabled = true
+tracks/2/path = NodePath("Armature/Skeleton3D:body")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = PackedFloat32Array(0, 1, -0.5, 0.5, -0.5, 0.5)
+tracks/3/type = "position_3d"
+tracks/3/imported = true
+tracks/3/enabled = true
+tracks/3/path = NodePath("Armature/Skeleton3D:mag.001")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = PackedFloat32Array(0, 1, 0.0160057, -0.0706149, -8.52444e-09)
+tracks/4/type = "rotation_3d"
+tracks/4/imported = true
+tracks/4/enabled = true
+tracks/4/path = NodePath("Armature/Skeleton3D:mag.001")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = PackedFloat32Array(0, 1, -8.3171e-08, -1.19843e-07, -0.65454, 0.756027)
+tracks/5/type = "position_3d"
+tracks/5/imported = true
+tracks/5/enabled = true
+tracks/5/path = NodePath("Armature/Skeleton3D:mag.002")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/keys = PackedFloat32Array(0, 1, 0.0160057, -0.570615, -1.49589e-07)
+tracks/6/type = "rotation_3d"
+tracks/6/imported = true
+tracks/6/enabled = true
+tracks/6/path = NodePath("Armature/Skeleton3D:mag.002")
+tracks/6/interp = 1
+tracks/6/loop_wrap = true
+tracks/6/keys = PackedFloat32Array(0, 1, -4.10425e-09, -2.85142e-08, -0.654543, 0.756025)
+tracks/7/type = "method"
+tracks/7/imported = false
+tracks/7/enabled = true
+tracks/7/path = NodePath(".")
+tracks/7/interp = 1
+tracks/7/loop_wrap = true
+tracks/7/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"values": [{
+"args": [],
+"method": &"fire_projectile"
+}]
+}

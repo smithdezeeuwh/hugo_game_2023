@@ -1,5 +1,15 @@
 extends Node3D
 
+#@export var defult_position : vector3
+@export var defult_position : Vector3
+@export var ads_position : Vector3
+@export var recoil_position : Vector3
+@export var recoil_rotation: Vector3
+const ads_lerp = 20
+var is_ADS: bool
+const recoil_lerp = 20
+
+
 var current_item_slot = "Primary"
 var item_index: int = 1 # For switching items via scroll wheel, which requires a numeric key.
 var is_changing_item: bool = true
@@ -12,13 +22,16 @@ var is_changing_item: bool = true
 @onready var items: Dictionary = {
 	"Melee":$Fists,
 	"Primary":$AK47,
-	"Secondary":null,
+	"Secondary":$ak_74u,
 	"Grenade":null
 }
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	update_item_index()
+	
+func _physics_process(delta: float) -> void:
+	ADS(delta)
 
 func set_item(item: String, slot: String = current_item_slot) -> void:
 	request_action("drop_item", slot)
@@ -39,7 +52,35 @@ func request_action(item_action: String, slot: String = current_item_slot) -> vo
 		print(current_item_slot + str(item_index))
 		next_item()
 
+func equip_primary():
+	print("equip primary request part 2")
+	request_action("unequip")
+	set_current_item(items.keys()[1])
 
+func equip_secondary():
+	request_action("unequip")
+	set_current_item(items.keys()[2])
+
+func equip_melee():
+	request_action("unequip")
+	set_current_item(items.keys()[0])
+	
+func ADS(delta):
+	if Input.is_action_pressed("ADS"):
+		print("ADS")
+		transform.origin = transform.origin.lerp(ads_position, ads_lerp * delta)
+		is_ADS = true
+	else: 
+		transform.origin = transform.origin.lerp(defult_position, ads_lerp * delta)
+		is_ADS = false
+
+func is_ads():
+	return is_ADS
+
+func fire_recoil():
+	transform.origin = transform.origin.lerp(recoil_rotation,  recoil_lerp)
+
+		
 # There would be an infinite loop for these two if we had no items at all,
 # which is why we must always have a 'fists' item in the melee slot at the least.
 func next_item():
@@ -86,3 +127,32 @@ func update_item_index():
 			item_index = 2
 		"Grenade":
 			item_index = 3
+
+func pickup_ammo(new_item_data):
+	items[current_item_slot].item_data.current_clip_ammo = new_item_data.current_clip_ammo
+# Searches for item pickups, and based on player input executes further tasks
+# (will be called from player.gd)
+
+func check_item_pickup(raycast: RayCast3D):
+	raycast.force_raycast_update()
+	
+	if raycast.is_colliding():
+		var body = raycast.get_collider()
+		
+		if body.is_in_group("pickup"):
+			var item_data = body.get_item_pickup_data()
+			print(item_data)
+			print("ranga")
+			
+			#show_interaction_prompt(item_data)
+			
+			if Input.is_action_just_pressed("interact"):
+				#replace_item(item_data)
+				body.queue_free()
+			return
+		
+	else:
+		pass
+		#hide_interaction_prompt()
+
+

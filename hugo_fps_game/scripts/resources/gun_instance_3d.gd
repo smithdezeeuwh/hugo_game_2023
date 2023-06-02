@@ -37,7 +37,7 @@ var is_firing: bool = false
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	pass # Replace with function body.
+	animation_player.animation_finished.connect(_on_animation_player_animation_finished)
 
 func unequip() -> void:
 	is_equipped = false
@@ -86,7 +86,7 @@ func can_reload() -> bool:
 		
 	return true
 
-func _physics_process(delta: float) -> void:
+func _physics_process(_delta: float) -> void:
 	pass
 
 func reload():
@@ -112,6 +112,7 @@ func _on_animation_player_animation_finished(anim_name: StringName) -> void:
 			EventBus.update_player_ui.emit(item_data)
 			
 		"fire":
+			print("fire finished")
 			is_firing = false
 		
 
@@ -121,7 +122,6 @@ func request_fire_stop() -> void:
 func request_fire() -> void:
 	if !can_fire():
 		return
-	
 	is_firing = true
 	
 	if item_data.is_automatic:
