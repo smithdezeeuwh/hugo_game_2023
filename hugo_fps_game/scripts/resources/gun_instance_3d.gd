@@ -90,9 +90,12 @@ func _physics_process(_delta: float) -> void:
 	pass
 
 func reload():
+	#print("reload called")
 	if can_reload():
+		#print("reload passed")
 		is_firing = false
 		is_reloading = true
+		#print("animation played")
 		animation_player.play("reload")
 	
 # TODO: Better to do this as a method call in the animation track, so you can have different stages of reload completeness.
@@ -112,7 +115,7 @@ func _on_animation_player_animation_finished(anim_name: StringName) -> void:
 			EventBus.update_player_ui.emit(item_data)
 			
 		"fire":
-			print("fire finished")
+			#print("fire finished")
 			is_firing = false
 		
 
@@ -126,8 +129,10 @@ func request_fire() -> void:
 	
 	if item_data.is_automatic:
 		animation_player.play("fire", -1.0, item_data.rate_of_fire)
+		
 	else:
 		animation_player.play("fire", -1.0, item_data.rate_of_fire)
+		
 
 # Called from the animation track.
 func fire_projectile() -> void:
@@ -137,12 +142,13 @@ func fire_projectile() -> void:
 	if item_data.current_clip_ammo < 1:
 		return
 	
-	print("bang")
+	#print("bang")
 	
 	item_data.current_clip_ammo -= 1
 	
 	if player_camera_ray == null:
-		print("no player camera ray")
+		pass
+		#print("no player camera ray")
 		#return
 	
 	# Spawn a raycast from the centre of the player camera.

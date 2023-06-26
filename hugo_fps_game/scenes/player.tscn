@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3 uid="uid://kqsxuguvtlfw"]
+[gd_scene load_steps=10 format=3 uid="uid://kqsxuguvtlfw"]
 
 [ext_resource type="Script" path="res://scripts/player/player.gd" id="1_gt8i6"]
 [ext_resource type="PackedScene" uid="uid://daej5ouv6hbf7" path="res://scenes/player_ui.tscn" id="2_ptk7f"]
@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://dppv2eu1wpv64" path="res://scenes/items/ak_47.tscn" id="3_lcq1y"]
 [ext_resource type="Script" path="res://scripts/player/item_manager.gd" id="3_uitb4"]
 [ext_resource type="PackedScene" uid="uid://bt7vcgslb8ux8" path="res://scenes/items/ak_74u.tscn" id="5_7xqr1"]
+[ext_resource type="PackedScene" uid="uid://ctgtipblkpt38" path="res://scenes/items/pkm.tscn" id="7_olcan"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_c06xs"]
 radius = 0.3
@@ -28,14 +29,16 @@ shape = SubResource("CapsuleShape3D_c06xs")
 mesh = SubResource("CapsuleMesh_4hpr4")
 skeleton = NodePath("../..")
 
+[node name="PlayerUI" parent="." instance=ExtResource("2_ptk7f")]
+
 [node name="Camera3D" type="Camera3D" parent="."]
-top_level = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
 fov = 90.0
 near = 0.04
 far = 2000.0
 
 [node name="Hands" type="Node3D" parent="Camera3D"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.188, -0.071, -0.279)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.021, -0.092, -0.102)
 script = ExtResource("3_uitb4")
 defult_position = Vector3(0.188, -0.177, -0.279)
 ads_position = Vector3(0, -0.092, -0.211)
@@ -50,9 +53,13 @@ visible = false
 
 [node name="ak_74u" parent="Camera3D/Hands" instance=ExtResource("5_7xqr1")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.040621, -0.0314268)
+visible = false
+
+[node name="pkm" parent="Camera3D/Hands" instance=ExtResource("7_olcan")]
+transform = Transform3D(-2.18557e-08, 0, 0.5, 0, 0.5, 0, -0.5, 0, -2.18557e-08, 0.022, -0.183, -0.032)
+visible = false
 
 [node name="RayCast3D" type="RayCast3D" parent="Camera3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.0684244, 0)
 target_position = Vector3(0, 0, -1000)
 collide_with_areas = true
-
-[node name="PlayerUI" parent="." instance=ExtResource("2_ptk7f")]

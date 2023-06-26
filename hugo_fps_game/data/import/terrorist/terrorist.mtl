@@ -1,0 +1,81 @@
+newmtl ARMan0003FBXASC045MeshSG1
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.59 0.59 0.59
+Tf 1.00 1.00 1.00
+map_Kd ARMan0003-Body-D-white.tif
+Ni 1.00
+Ks 0.00 0.00 0.00
+Ns 0.00
+newmtl ARMan0003FBXASC045MeshSG3
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.59 0.59 0.59
+Tf 1.00 1.00 1.00
+map_Kd ARMan0001-Head-D.tif
+Ni 1.00
+Ks 0.20 0.20 0.20
+Ns 14.00
+newmtl Phoenix:t_phoenix_tga
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.60 0.60 0.60
+Tf 1.00 1.00 1.00
+map_Kd t_phoenix.tga
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 0.00
+newmtl Phoenix1:t_phoenix_tga
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.60 0.60 0.60
+Tf 1.00 1.00 1.00
+map_Kd t_phoenix.tga
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 0.00
+newmtl Soldier03:stalker
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.60 0.60 0.60
+Tf 1.00 1.00 1.00
+Ni 1.00
+Ks 0.90 0.90 0.90
+Ns 0.00
+newmtl blinn1SG
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd 8430f8ee.jpg
+Ni 1.00
+Ks 0.50 0.50 0.50
+newmtl lambert2SG
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd t_guerilla.tga
+Ni 1.00
+newmtl lambert3SG
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd images (7).jpg
+Ni 1.00
+newmtl lambert4SG
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd t_phoenix.tga
+Ni 1.00
+newmtl stalker:stalker
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+Ni 1.50
+Ks 0.00 0.00 0.00
+Ns 0.00

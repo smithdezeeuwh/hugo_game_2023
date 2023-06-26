@@ -7,10 +7,10 @@ extends Node3D
 @export var recoil_rotation: Vector3
 const ads_lerp = 20
 var is_ADS: bool
-const recoil_lerp = 20
+const recoil_lerp = 0.2
 
 
-var current_item_slot = "Primary"
+var current_item_slot = "Secondary"
 var item_index: int = 1 # For switching items via scroll wheel, which requires a numeric key.
 var is_changing_item: bool = true
 
@@ -21,13 +21,15 @@ var is_changing_item: bool = true
 # IMPORTANT: Make sure these are in the same order as update_item_index().
 @onready var items: Dictionary = {
 	"Melee":$Fists,
-	"Primary":$AK47,
+	"Primary":$pkm,
 	"Secondary":$ak_74u,
 	"Grenade":null
 }
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
+	request_action("equip", current_item_slot)
+	
 	update_item_index()
 	
 func _physics_process(delta: float) -> void:
@@ -67,8 +69,11 @@ func equip_melee():
 	
 func ADS(delta):
 	if Input.is_action_pressed("ADS"):
-		print("ADS")
-		transform.origin = transform.origin.lerp(ads_position, ads_lerp * delta)
+		#print("ADS")
+		transform.origin = transform.origin.lerp(items[current_item_slot].item_data.ads_position, ads_lerp * delta)
+		print(items[current_item_slot])
+		print(items[current_item_slot].item_data.ads_position)
+		#transform.origin = transform.origin.lerp(ads_position, ads_lerp * delta)
 		is_ADS = true
 	else: 
 		transform.origin = transform.origin.lerp(defult_position, ads_lerp * delta)
@@ -78,8 +83,8 @@ func is_ads():
 	return is_ADS
 
 func fire_recoil():
-	transform.origin = transform.origin.lerp(recoil_rotation,  recoil_lerp)
-
+	pass
+	#transform.origin = transform.origin.lerp(recoil_position,  recoil_lerp)
 		
 # There would be an infinite loop for these two if we had no items at all,
 # which is why we must always have a 'fists' item in the melee slot at the least.

@@ -34,6 +34,8 @@ var camera_effect_offset := Vector3.ZERO
 var camera_FOV: float = 80
 var camera_recoil_x: float = 0 
 var camera_recoil_y: float = 0 
+var camera_rotation_x: float = 0
+var camera_rotation_y: float = 0
 var camera_FOV_clamp: int = 100
 
 #@onready var tween := create_tween()
@@ -58,11 +60,17 @@ var ready_to_crouch_slide: bool = false
 var is_sprinting: bool 
 var is_crouchsliding: bool 
 
+#shooting
+var fire: bool
+var up_recoil = 0
+var recoil_y: float = 0.0
+var recoil_x: float = 0.0
 
 @onready var camera: Camera3D = $Camera3D
 @onready var collider: CollisionShape3D = $CollisionShape3D
 @onready var ui = $PlayerUI
 @onready var item_manager = $Camera3D/Hands
+
 @onready var raycast = $Camera3D/RayCast3D
 
 func _ready() -> void:
@@ -82,10 +90,26 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	process_camera_position()
+	update_camera_rotation(delta)
+	update_fov(delta)
+	check_position()
 	
+func check_position():
+	pass
+	var player: CollisionShape3D
+	if self.is_in_group("boundry_check"):
+		print("player fell out")
+		
+
+func _on_boundry_body_entered(body):
+	pass
+	#print("boundery exited")
+	#get_tree().change_scene_to_file("res://scenes/world.tscn")
+
+func update_fov(delta):
 	if item_manager.is_ads():
 		#camera_FOV = lerp(camera_FOV, 60, 0.5 *  _delta)
-		print("befoire " + str(camera_FOV))
+		#print("befoire " + str(camera_FOV))
 		camera_FOV = lerp(camera_FOV, 50.0, delta * 2)
 	if is_sprinting == true:
 		camera_FOV = lerp(camera_FOV, 100.0, delta * 2)
@@ -94,12 +118,13 @@ func _process(delta: float) -> void:
 	else:
 		camera_FOV = lerp(camera_FOV, 90.0, delta * 2)
 	
-	print("after " + str(camera_FOV))
+	#print("after " + str(camera_FOV))
 	camera.set_fov(camera_FOV)
 		
 	camera_FOV = clamp(camera_FOV, 0, 100)
 	#print("cap" + str(tween.is_running()))
-
+	
+	
 func _input(event: InputEvent) -> void:
 	# Only look around if the mouse is invisible.
 	if event is InputEventMouseMotion:
@@ -131,13 +156,16 @@ func handle_input() -> void:
 	# Items and stuff.
 	if Input.is_action_pressed("fire"):
 		item_manager.request_action("fire")
+		fire = true
+	else:
+		fire = false
 	if Input.is_action_just_released("fire"):
 		item_manager.request_action("fire_stop")
 	
-	if Input.is_action_just_pressed("fire_2"):
-		item_manager.request_action("fire_2")
-	if Input.is_action_just_released("fire_2"):
-		item_manager.request_action("fire_2_stop")
+	#if Input.is_action_just_pressed("fire_2"):
+	#	item_manager.request_action("fire_2")
+	#if Input.is_action_just_released("fire_2"):
+	#	item_manager.request_action("fire_2_stop")
 	
 	if Input.is_action_just_pressed("drop_item"):
 		item_manager.request_action("drop_item")
@@ -154,9 +182,15 @@ func handle_input() -> void:
 		
 	if Input.is_action_just_pressed("melee"):
 		item_manager.equip_melee()
+		
+	if Input.is_action_pressed("menu"):
+		get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
+		
 
 		
-	
+
+
+
 func _physics_process(delta: float) -> void:
 	item_manager.check_item_pickup(raycast)
 	
@@ -165,6 +199,7 @@ func _physics_process(delta: float) -> void:
 	check_movement_flags()
 	handle_crouching()
 	process_movement_state(delta)
+	
 	
 	ui.update_speed(horizontal_velocity)
 
@@ -175,7 +210,9 @@ func check_movement_flags() -> void:
 		current_movement_state = MovementStates.IN_AIR
 
 func process_camera_position() -> void:
-	camera.global_position = global_position + camera_position_offset + camera_effect_offset
+	#camera.global_position = global_position + camera_position_offset + camera_effect_offset
+	#camera.position
+	pass
 	
 
 func process_camera_rotation(relative_mouse_motion) -> void:
@@ -185,11 +222,46 @@ func process_camera_rotation(relative_mouse_motion) -> void:
 	mouse_rotation.x = clampf(mouse_rotation.x - (relative_mouse_motion.y * MOUSE_SENSITIVITY),
 			camera_lower_clamp_rad,
 			camera_upper_clamp_rad)
-	
+	#print("relative_mouse_motion.x before" + str(relative_mouse_motion.x))
 	# Rotate head independently of body.
 	# This camera also determines the local direction of WASD.
+	
 	camera.rotation.x = mouse_rotation.x
 	camera.rotation.y = mouse_rotation.y
+	
+	
+	
+func update_camera_rotation(delta):
+	#camera_rotation_x = mouse_rotation.x + camera_recoil_x
+	#camera_rotation_y = mouse_rotation.y + camera_recoil_y
+	#camera_rotation_x = clampf(camera_rotation_x, camera_lower_clamp_rad, camera_upper_clamp_rad)
+	#if camera_rotation_x > 1.5:
+	#	camera_rotation_x = 1.54 
+	#camera.rotation.x = mouse_rotation.x
+	#camera.rotation.y = mouse_rotation.y
+	pass
+func process_recoil():
+	
+	recoil_y = randf_range(-.05, .05)
+	recoil_x = randf_range(.03, .05)
+	
+	mouse_rotation.y += recoil_y
+	mouse_rotation.x += recoil_x
+	
+	process_camera_rotation(Vector2.ZERO)
+
+	#up_recoil += recoil * 0.1
+	#head.rotation.x = lerp( head.rotation.x , deg_to_rad(head.rotation_degrees.x + up_recoil ) ,0.1 )
+	#head.rotation.y = lerp( head.rotation.y , deg_to_rad(side_recoil ) ,  3 * 0.1 )
+	#if up_recoil >= 35:
+		#up_recoil = 0
+	#print("head rotation x"+ str(head.rotation.x))
+	#print("head rotation y"+ str(head.rotation.y))
+	#print("head rotation z"+ str(head.rotation.z))
+	#print("camera rotation x"+ str(camera.rotation.x))
+	#print("camera rotation y"+ str(camera.rotation.y))
+	#print("camera rotation z"+ str(camera.rotation.z))
+	
 
 func check_movement_state() -> void:
 	if is_on_floor():
@@ -337,26 +409,9 @@ func clamp_vector(vector: Vector3, clamp_length: float) -> Vector3:
 func _on_projectile_fired(item_data, projectile_transform):
 	print("shoot")
 	ui.update_ammo(item_data)
+	process_recoil()
 	
-	#methond 2 recoil
 	
-	item_manager.fire_recoil()
-	
-	#method 1 recoil
-	# TODO: add recoil and camera shake and stuff!
-	#camera_effect_offset += Vector3(0, randf_range(0, .3), randf_range(-.3, .3))
-	#var tween = create_tween().set_parallel(true)
-	#tween.tween_property(self, "camera_effect_offset", Vector3.ZERO, 0.2).from_current()
-	#camera_position_offset += Vector3(0,0.01,0)
-	#camera.translate(Vector3(0,0.1,0.01))
-	#item_manager.translate(Vector3(0,0.01,0))
-	
-	#methond 3 recoil
-	#camera_recoil_x += 0.05
-	#camera_recoil_y += 0
-	#wait(0.05)
-	#camera_recoil_x += 0.0
-	#camera_recoil_y += 0.0
 	
 	
 
@@ -368,3 +423,6 @@ func _on_player_reloaded(item_data):
 
 func _on_update_player_ui(item_data):
 	ui.update_ammo(item_data)
+
+
+

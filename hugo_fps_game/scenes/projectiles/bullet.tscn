@@ -13,6 +13,6 @@ grow_amount = -0.706
 material = SubResource("StandardMaterial3D_kobl1")
 size = Vector3(0.05, 0.05, 0.5)
 
-[node name="Bullet" type="MeshInstance3D"]
+[node name="Bullet" type="MeshInstance3D" groups=["Bullet"]]
 mesh = SubResource("BoxMesh_q0jar")
 script = ExtResource("1_vyaev")

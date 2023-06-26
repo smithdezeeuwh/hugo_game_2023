@@ -1,4 +1,5 @@
 extends Node3D
+@onready var enemy = load("res://scripts/resources/enemy.gd")
 
 # Pool of projectiles, these are added and deleted when a gun is fired.
 var projectiles: Array = []
@@ -60,8 +61,9 @@ func process_projectiles(delta):
 
 			# Check if we hit an enemy, then damage them. Spawn the correct impact effect.
 			if hit.is_in_group("Enemy"):
-				hit.damage(bullet.damage)
+				#hit.damage(bullet.damage)
 				print("hit enemy")
+				enemy.got_hit()
 				#var new_impact = instantiate_node(blood_impact, impact_position)
 				#new_impact.position = impact_position
 

@@ -4,6 +4,7 @@ class_name GunData
 @export_group("Gun Properties")
 
 @export var is_automatic: bool = false
+@export var ads_position: Vector3 = Vector3(0, 0, 0)
 
 @export var max_extra_ammo: int = 120
 @export var current_extra_ammo: int = 120
