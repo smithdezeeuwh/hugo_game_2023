@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="GunData" load_steps=3 format=3 uid="uid://daakl3usmmfor"]
+
+[ext_resource type="PackedScene" uid="uid://42mn0hqs3ak7" path="res://scenes/projectiles/bullet.tscn" id="1_ilvqs"]
+[ext_resource type="Script" path="res://scripts/resources/gun_data.gd" id="2_3x662"]
+
+[resource]
+script = ExtResource("2_3x662")
+is_automatic = true
+ads_position = Vector3(-0.15, 0.06, 0.149)
+max_extra_ammo = 200
+current_extra_ammo = 100
+max_clip_ammo = 100
+current_clip_ammo = 100
+damage = 15
+rate_of_fire = 1.0
+max_recoil_x = 0.07
+max_recoil_y = 0.04
+projectiles_per_shot = 1
+projectile_speed = 10.0
+randomness = 0.5
+raycast_distance = 5
+projectile_scene = ExtResource("1_ilvqs")
+item_name = "PKM"
+can_be_dropped = true
+slot_type = "Secondary"

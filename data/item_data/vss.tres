@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="GunData" load_steps=3 format=3 uid="uid://cewjvm7o7skbe"]
+
+[ext_resource type="PackedScene" uid="uid://42mn0hqs3ak7" path="res://scenes/projectiles/bullet.tscn" id="1_0syrt"]
+[ext_resource type="Script" path="res://scripts/resources/gun_data.gd" id="2_1t03f"]
+
+[resource]
+script = ExtResource("2_1t03f")
+is_automatic = false
+ads_position = Vector3(-0.123, 0, 0.073)
+max_extra_ammo = 100
+current_extra_ammo = 40
+max_clip_ammo = 20
+current_clip_ammo = 20
+damage = 15
+rate_of_fire = 1.0
+max_recoil_x = 0.02
+max_recoil_y = 0.01
+projectiles_per_shot = 1
+projectile_speed = 10.0
+randomness = 0.5
+raycast_distance = 5
+projectile_scene = ExtResource("1_0syrt")
+item_name = "vss"
+can_be_dropped = true
+slot_type = "Secondary"
