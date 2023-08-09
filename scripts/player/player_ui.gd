@@ -1,14 +1,12 @@
 extends CanvasLayer
 
-@onready var health_text = $HealthRect/HealthText
-@onready var ammo_text = $AmmoRect/AmmoText
-@onready var speed_text = $SpeedRect/SpeedText
+@onready var health_text = $MarginContainer/Health
+@onready var ammo_text = $MarginContainer/Ammo
+@onready var speed_text = $MarginContainer/Speed
+@onready var pickup_prompt = $MarginContainer/PickupPrompt
 
 
-@onready var health_rect = $HealthRect
-@onready var ammo_rect = $AmmoRect
-@onready var speed_rect = $SpeedRect
-@onready var scope_overlay = $Zoom_overlay
+@onready var scope_overlay = $MarginContainer/ZoomOverlay
 var is_scoping:bool = false
 
 # Called when the node enters the scene tree for the first time.
@@ -22,10 +20,10 @@ func _process(_delta: float) -> void:
 
 func update_ammo(item_data: ItemData) -> void:
 	if item_data.slot_type == "Melee":
-		ammo_rect.hide()
+		ammo_text.hide()
 		return
 	
-	ammo_rect.show()
+	ammo_text.show()
 	
 	ammo_text.text = str(item_data.current_clip_ammo) + "/" + str(item_data.current_extra_ammo)
 	

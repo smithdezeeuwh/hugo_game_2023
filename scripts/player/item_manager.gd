@@ -6,14 +6,18 @@ extends Node3D
 const ads_lerp = 20
 var is_ADS: bool
 const recoil_lerp = 0.2
+var body
 
 
 var current_item_slot = "Secondary"
 var item_index: int = 1 # For switching items via scroll wheel, which requires a numeric key.
 var is_changing_item: bool = true
+var pickup_item_data: ItemData
 
 @onready var all_items: Dictionary = {
-	"ak_47":preload("res://scenes/items/ak_47.tscn")
+	"AK-74U":$ak_74u,
+	"PKM":$pkm,
+	"vss":$vss
 }
 
 @onready var player = get_parent().get_parent()
@@ -21,8 +25,8 @@ var is_changing_item: bool = true
 # this is the player inventory with defult items set
 @onready var items: Dictionary = {
 	"Melee":$Fists,
-	"Primary":$pkm,
-	"Secondary":$vss,
+	"Primary":$Fists,
+	"Secondary":$Fists,
 	"Grenade":null
 }
 
@@ -36,8 +40,18 @@ func _physics_process(delta: float) -> void:
 	ADS(delta)
 
 func set_item(item: String, slot: String = current_item_slot) -> void:
-	request_action("drop_item", slot)
-	items[slot] = call_deferred("add_child", all_items[item]) # Will create new slot entry if incorrect!
+	items[slot].hide()
+	if items[slot].item_data.item_name == "Fists":
+		pass
+	else:
+		var new_pickup: RigidBody3D = items[slot].gun_pickup.instantiate()
+		new_pickup.global_position = global_position
+		new_pickup.apply_impulse(get_parent().basis.z * -2)
+		get_parent().get_parent().get_parent().add_child(new_pickup)
+		
+	items[slot] = all_items[pickup_item_data.item_name]
+	items[slot].item_data = pickup_item_data
+	set_current_item(slot)
 	
 
 func get_item():
@@ -156,25 +170,43 @@ func check_item_pickup(raycast: RayCast3D):
 	raycast.force_raycast_update()
 	
 	if raycast.is_colliding():
-		var body = raycast.get_collider()
+		body = raycast.get_collider()
 		
 		if body.is_in_group("pickup"):
-			var item_data = body.get_item_pickup_data()
-		
-			#show_interaction_prompt(item_data)
+			pickup_item_data = body.get_item_pickup_data()
 			
-			if Input.is_action_just_pressed("interact"):
-				#replace_item(item_data)
-				body.queue_free()
-			return
-		
-	else:
-		pass
-		#hide_interaction_prompt()
+			player.ui.pickup_prompt.show()
+			
+		else:
+			player.ui.pickup_prompt.hide()
 
 #pass recoil to player srcipt\
 func get_x_recoil():
 	return items[current_item_slot].item_data.max_recoil_x
 func get_y_recoil():
 	return items[current_item_slot].item_data.max_recoil_y
+
+
+
+var mouse_mov
+var sway_threshold = 5
+var sway_lerp = 5
+@export var sway_left : Vector3
+@export var sway_right : Vector3
+@export var sway_normal : Vector3
+
+
+func _input(event):
+	if event is InputEventMouseMotion:
+		mouse_mov = -event.relative.x
+	
+func _process(delta):
+	if ! is_ADS:
+		if mouse_mov != null:
+			if mouse_mov > sway_threshold:
+				rotation = rotation.lerp(sway_left, sway_lerp * delta)
+			elif mouse_mov < -sway_threshold:
+				rotation = rotation.lerp(sway_right, sway_lerp * delta)
+			else:
+				rotation = rotation.lerp(sway_normal, sway_lerp * delta)
 

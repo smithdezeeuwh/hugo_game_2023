@@ -1,6 +1,7 @@
-[gd_scene load_steps=11 format=3 uid="uid://bt7vcgslb8ux8"]
+[gd_scene load_steps=12 format=3 uid="uid://bt7vcgslb8ux8"]
 
 [ext_resource type="Script" path="res://scripts/resources/gun_instance_3d.gd" id="2_x87fd"]
+[ext_resource type="PackedScene" uid="uid://cubiustekwl" path="res://scenes/items/ak_74u_pickup.tscn" id="3_eqe1p"]
 [ext_resource type="PackedScene" uid="uid://42mn0hqs3ak7" path="res://scenes/projectiles/bullet.tscn" id="3_p0dcs"]
 [ext_resource type="Resource" uid="uid://dpe3478nml3qs" path="res://data/item_data/ak_74u.tres" id="4_3wgao"]
 [ext_resource type="Animation" uid="uid://cvjq02xhoircg" path="res://data/animations/items/ak_74u/fire.tres" id="4_j4xof"]
@@ -76,6 +77,7 @@ _data = {
 [node name="ak_74u" type="Node3D" node_paths=PackedStringArray("muzzle", "animation_player")]
 script = ExtResource("2_x87fd")
 bullet_projectile = ExtResource("3_p0dcs")
+gun_pickup = ExtResource("3_eqe1p")
 muzzle = NodePath("Muzzle")
 animation_player = NodePath("AnimationPlayer")
 item_data = ExtResource("4_3wgao")

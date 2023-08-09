@@ -6,14 +6,14 @@
 [resource]
 script = ExtResource("2_typ7s")
 is_automatic = true
-ads_position = Vector3(0, -0.092, -0.211)
+ads_position = Vector3(-0.144, 0.039, 0.055)
 max_extra_ammo = 120
 current_extra_ammo = 120
 max_clip_ammo = 30
 current_clip_ammo = 30
 damage = 15
-rate_of_fire = 1.0
-max_recoil_x = 0.02
+rate_of_fire = 0.8
+max_recoil_x = 0.04
 max_recoil_y = 0.01
 projectiles_per_shot = 1
 projectile_speed = 10.0

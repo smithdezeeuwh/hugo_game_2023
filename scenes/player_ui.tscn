@@ -1,79 +1,104 @@
 [gd_scene load_steps=4 format=3 uid="uid://daej5ouv6hbf7"]
 
 [ext_resource type="Script" path="res://scripts/player/player_ui.gd" id="1_pse61"]
+[ext_resource type="StyleBox" uid="uid://dhctl63c70lop" path="res://data/ui/style_box_au.tres" id="2_f2lm2"]
 [ext_resource type="Texture2D" uid="uid://cbg8rpnehf0fx" path="res://data/import/scopeoverlay.png" id="2_mvbng"]
-
-[sub_resource type="LabelSettings" id="LabelSettings_eomoh"]
-font_size = 35
-shadow_size = 11
-shadow_color = Color(0, 0, 0, 0.360784)
-shadow_offset = Vector2(0, 0)
 
 [node name="PlayerUI" type="CanvasLayer"]
 script = ExtResource("1_pse61")
 
-[node name="HealthRect" type="ColorRect" parent="."]
-anchors_preset = 2
-anchor_top = 1.0
+[node name="MarginContainer" type="MarginContainer" parent="."]
+anchors_preset = 15
+anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = -54.0
-offset_right = 172.0
-grow_vertical = 0
-color = Color(0.141176, 0.141176, 0.141176, 0.392157)
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 40
+theme_override_constants/margin_top = 40
+theme_override_constants/margin_right = 40
+theme_override_constants/margin_bottom = 40
 
-[node name="HealthText" type="Label" parent="HealthRect"]
+[node name="Health" type="Label" parent="MarginContainer"]
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 8
+theme_override_font_sizes/font_size = 32
+theme_override_styles/normal = ExtResource("2_f2lm2")
+text = "Health"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ColorRect" type="ColorRect" parent="MarginContainer/Health"]
+show_behind_parent = true
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-text = "100"
-label_settings = SubResource("LabelSettings_eomoh")
+color = Color(0.105882, 0.105882, 0.105882, 0.478431)
+
+[node name="Ammo" type="Label" parent="MarginContainer"]
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 8
+theme_override_font_sizes/font_size = 32
+theme_override_styles/normal = ExtResource("2_f2lm2")
+text = "Ammo"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="AmmoRect" type="ColorRect" parent="."]
-anchors_preset = 3
-anchor_left = 1.0
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -172.0
-offset_top = -54.0
-grow_horizontal = 0
-grow_vertical = 0
-color = Color(0.141176, 0.141176, 0.141176, 0.392157)
-
-[node name="AmmoText" type="Label" parent="AmmoRect"]
+[node name="ColorRect" type="ColorRect" parent="MarginContainer/Ammo"]
+show_behind_parent = true
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-text = "30/120"
-label_settings = SubResource("LabelSettings_eomoh")
+color = Color(0.105882, 0.105882, 0.105882, 0.478431)
+
+[node name="Speed" type="Label" parent="MarginContainer"]
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 0
+theme_override_font_sizes/font_size = 32
+theme_override_styles/normal = ExtResource("2_f2lm2")
+text = "Speed"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="SpeedRect" type="ColorRect" parent="."]
-offset_left = -2.0
-offset_top = 6.0
-offset_right = 469.0
-offset_bottom = 110.0
-color = Color(0.141176, 0.141176, 0.141176, 0.392157)
+[node name="ColorRect" type="ColorRect" parent="MarginContainer/Speed"]
+show_behind_parent = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.105882, 0.105882, 0.105882, 0.478431)
 
-[node name="SpeedText" type="Label" parent="SpeedRect"]
-layout_mode = 0
-offset_right = 464.0
-offset_bottom = 100.0
-text = "100"
-label_settings = SubResource("LabelSettings_eomoh")
+[node name="PickupPrompt" type="Label" parent="MarginContainer"]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 32
+theme_override_styles/normal = ExtResource("2_f2lm2")
+text = "Pickup au"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Zoom_overlay" type="TextureRect" parent="."]
-offset_right = 40.0
-offset_bottom = 40.0
+[node name="ColorRect" type="ColorRect" parent="MarginContainer/PickupPrompt"]
+show_behind_parent = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.105882, 0.105882, 0.105882, 0.478431)
+
+[node name="ZoomOverlay" type="TextureRect" parent="MarginContainer"]
+visible = false
+layout_mode = 2
 texture = ExtResource("2_mvbng")

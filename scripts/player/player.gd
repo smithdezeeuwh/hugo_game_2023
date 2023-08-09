@@ -184,9 +184,6 @@ func handle_input() -> void:
 	#if Input.is_action_just_released("fire_2"):
 	#	item_manager.request_action("fire_2_stop")
 	
-	if Input.is_action_just_pressed("drop_item"):
-		item_manager.request_action("drop_item")
-	
 	if Input.is_action_just_pressed("reload"):
 		item_manager.request_action("reload")
 		
@@ -202,6 +199,11 @@ func handle_input() -> void:
 		
 	if Input.is_action_pressed("menu"):
 		get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
+	
+	if Input.is_action_just_pressed("pickup") and ui.pickup_prompt.visible:
+		print("picked up")
+		item_manager.set_item("ak_47")
+		item_manager.body.queue_free()
 		
 
 		
@@ -436,7 +438,7 @@ func not_scope():
 
 
 func load_difficulty():
-	var file = FileAccess.open("user://save.txt", FileAccess.READ)
+	var file = FileAccess.open(EventBus.savelocation + "save.txt", FileAccess.READ)
 	difficulty = int(file.get_as_text(true))
 	if difficulty == 1:
 		recoil_difficulty = 0.5
@@ -444,4 +446,6 @@ func load_difficulty():
 		recoil_difficulty = 1
 	elif difficulty == 3:
 		recoil_difficulty = 1.5
+
+
 

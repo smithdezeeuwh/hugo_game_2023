@@ -9,8 +9,12 @@ func _ready() -> void:
 
 func get_item_pickup_data() -> ItemData:
 	return item_data
+	
 
 func _on_sleeping_state_changed() -> void:
 	pass # Replace with function body.
 
 
+
+
+#

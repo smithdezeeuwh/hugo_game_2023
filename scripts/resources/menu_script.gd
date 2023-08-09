@@ -38,15 +38,15 @@ func _on_h_slider_value_changed(value):
 	if value ==3:
 		difficulty.text = str("Hard")
 	#gets save location
-	var savelocation = OS.get_executable_path()
+
 	#finds save file
-	var file = FileAccess.open("user://save.txt", FileAccess.WRITE)
+	var file = FileAccess.open(EventBus.savelocation + "save.txt", FileAccess.WRITE)
 	#saves difficulty for use in game scene
 	file.store_string(str(value))
 	
 
 func load_difficulty():
-	var file = FileAccess.open("user://save.txt", FileAccess.READ)
+	var file = FileAccess.open(EventBus.savelocation + "save.txt", FileAccess.READ)
 	difficulty_from_load = int(file.get_as_text(true))
 
 

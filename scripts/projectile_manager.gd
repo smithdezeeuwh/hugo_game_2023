@@ -63,11 +63,15 @@ func process_projectiles(delta):
 			if hit.is_in_group("Enemy"):
 				#hit.damage(bullet.damage)
 				print("hit enemy")
-				enemy.got_hit()
-				#var new_impact = instantiate_node(blood_impact, impact_position)
-				#new_impact.position = impact_position
+				hit.got_hit()
 
 				#impact_effects.append(new_impact)
+				var impact_transform = Transform3D(Basis(), collision.position)
+				
+				var new_impact: GPUParticles3D = instantiate_node(dust_impact, impact_transform)
+				new_impact.emitting = true
+
+				impact_effects.append(new_impact)
 			else:
 				print("hit not enemy")
 				#var impact_transform = Transform3D(collision.normal, collision.position)

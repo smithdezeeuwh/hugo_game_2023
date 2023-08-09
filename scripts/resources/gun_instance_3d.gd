@@ -5,6 +5,7 @@ class_name GunInstance3D
 @export var blood_impact: PackedScene
 @export var dust_impact: PackedScene
 @export var bullet_projectile: PackedScene
+@export var gun_pickup: PackedScene
 
 @export var muzzle: Node3D
 @export var muzzle_flash: Node3D

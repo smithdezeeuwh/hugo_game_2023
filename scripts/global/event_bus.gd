@@ -3,6 +3,8 @@ extends Node
 signal projectile_fired(item_data: ItemData, projectile_transform: Transform3D)
 signal update_player_ui(item_data: ItemData)
 
+var savelocation = str(OS.get_executable_path().get_base_dir()) + "/"
+
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
 	pass # Replace with function body.
