@@ -20,6 +20,7 @@ height = 1.8
 collision_mask = 5
 wall_min_slide_angle = 0.0
 floor_stop_on_slope = false
+floor_max_angle = 1.38405
 script = ExtResource("1_gt8i6")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]

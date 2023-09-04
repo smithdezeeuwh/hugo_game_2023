@@ -1,6 +1,9 @@
 extends ItemInstance3D
 class_name GunInstance3D
 
+signal bullet_fired
+@onready var player = get_parent().get_parent().get_parent()
+
 # Effects.
 @export var blood_impact: PackedScene
 @export var dust_impact: PackedScene
@@ -113,7 +116,6 @@ func _on_animation_player_animation_finished(anim_name: StringName) -> void:
 				item_data.current_extra_ammo = 0
 			
 			is_reloading = false
-			EventBus.update_player_ui.emit(item_data)
 			
 		"fire":
 			#print("fire finished")
@@ -133,6 +135,7 @@ func request_fire() -> void:
 	
 	if item_data.is_automatic:
 		animation_player.play("fire", -1.0, item_data.rate_of_fire)
+		player._on_projectile_fired(item_data, )
 	else:
 		if not has_already_fired:
 			animation_player.play("fire", -1.0, item_data.rate_of_fire)
@@ -159,13 +162,13 @@ func fire_projectile() -> void:
 	# Spawn a raycast from the centre of the player camera.
 	#player_camera_ray.force_raycast_update()
 	
-	var projectile_transform: Transform3D
-
-	projectile_transform.basis = muzzle.global_transform.basis
-	projectile_transform.origin = muzzle.global_transform.origin
-
-	# This gets picked up by the projectile manager, which spawns a proectile.
-	EventBus.projectile_fired.emit(item_data, projectile_transform)
+	var b = bullet_projectile.instantiate()
+	b.is_fired_by_enemy = false
+	b.last_position = muzzle.position
+	muzzle.add_child(b)
+	b.rotation += Vector3(randf_range(-0.01, 0.01), randf_range(-0.01, 0.01), 0)
+	
+	bullet_fired.emit()
 
 func request_aim() -> void:
 	pass

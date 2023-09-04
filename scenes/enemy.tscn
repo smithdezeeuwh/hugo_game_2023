@@ -1,14 +1,17 @@
-[gd_scene load_steps=4 format=3 uid="uid://b3mnwlkcujvbn"]
+[gd_scene load_steps=5 format=3 uid="uid://b3mnwlkcujvbn"]
 
 [ext_resource type="Script" path="res://scripts/resources/enemy.gd" id="1_wbo77"]
 [ext_resource type="ArrayMesh" uid="uid://cn0mescweibhh" path="res://data/import/terrorist/terrorist.obj" id="2_o57g2"]
+[ext_resource type="PackedScene" uid="uid://42mn0hqs3ak7" path="res://scenes/projectiles/bullet.tscn" id="2_u7t0j"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_w1nn6"]
 
 [node name="Enemy" type="CharacterBody3D" groups=["Enemy"]]
 collision_layer = 4
-collision_mask = 3
+collision_mask = 7
+wall_min_slide_angle = 0.0
 script = ExtResource("1_wbo77")
+bulletscene = ExtResource("2_u7t0j")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 shape = SubResource("CapsuleShape3D_w1nn6")
@@ -17,3 +20,6 @@ shape = SubResource("CapsuleShape3D_w1nn6")
 transform = Transform3D(0.0674624, 0, 0, 0, 0.0434361, 0, 0, 0, 0.0777747, -0.232968, -0.69956, 0.245638)
 mesh = ExtResource("2_o57g2")
 skeleton = NodePath("../CollisionShape3D")
+
+[node name="Muzzle" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.064975, 0.688783, 0)

@@ -21,7 +21,7 @@ const CAMERA_UPPER_CLAMP: float = 90.0 # These two are later converted to radian
 const CAMERA_LOWER_CLAMP: float = -90.0
 
 
-enum MovementStates{ON_GROUND, IN_AIR}
+enum MovementStates{ON_GROUND, IN_AIR, WALL_RUN}
 
 const reach_ray_length = 5
 
@@ -49,6 +49,7 @@ var direction := Vector3.ZERO
 var gravity_vector := Vector3.ZERO
 var current_collider_height: float = 1.8 # Used for shrinking the collider when crouching.
 var CROUCH_SLIDE_MULTIPLIER: float = 1.2
+var already_air_jumped: bool = false
 
 # Movement flags.
 var is_grounded: bool = false
@@ -81,9 +82,6 @@ func _ready() -> void:
 	load_difficulty()
 	camera.current = true
 	
-	EventBus.projectile_fired.connect(_on_projectile_fired) # For recoil and stuff.
-	#EventBus.player_reloaded.connect(_on_player_reloaded) # For updating the ui after reloading.
-	EventBus.update_player_ui.connect(_on_update_player_ui) # For updating the ui after reloading.
 	
 	# Convert these two to radians because Godot likes it, I suppose.
 	camera_upper_clamp_rad = deg_to_rad(CAMERA_UPPER_CLAMP)
@@ -93,7 +91,6 @@ func _ready() -> void:
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 
 func _process(delta: float) -> void:
-	process_camera_position()
 	update_camera_rotation(delta)
 	update_fov(delta)
 	check_position()
@@ -201,7 +198,6 @@ func handle_input() -> void:
 		get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
 	
 	if Input.is_action_just_pressed("pickup") and ui.pickup_prompt.visible:
-		print("picked up")
 		item_manager.set_item("ak_47")
 		item_manager.body.queue_free()
 		
@@ -215,24 +211,14 @@ func _physics_process(delta: float) -> void:
 	
 	handle_input()
 	
-	check_movement_flags()
+	check_movement_state()
 	handle_crouching()
 	process_movement_state(delta)
 	
 	
-	ui.update_speed(horizontal_velocity)
-
-func check_movement_flags() -> void:
-	if is_on_floor():
-		current_movement_state = MovementStates.ON_GROUND
-	else:
-		current_movement_state = MovementStates.IN_AIR
-
-func process_camera_position() -> void:
-	#camera.global_position = global_position + camera_position_offset + camera_effect_offset
-	#camera.position
-	pass
 	
+	
+	ui.update_speed(horizontal_velocity)
 
 func process_camera_rotation(relative_mouse_motion) -> void:
 	# Horizontal mouse look.
@@ -253,6 +239,7 @@ func process_camera_rotation(relative_mouse_motion) -> void:
 func update_camera_rotation(delta):
 	pass
 func process_recoil():
+	
 	var max_recoil_x: float = 0.0 
 	var max_recoil_y: float = 0.0 
 	var min_recoil_x: float = 0.0 
@@ -275,6 +262,9 @@ func process_recoil():
 func check_movement_state() -> void:
 	if is_on_floor():
 		current_movement_state = MovementStates.ON_GROUND
+	elif is_on_wall():
+		print("is on wall")
+		current_movement_state = MovementStates.WALL_RUN
 	else:
 		current_movement_state = MovementStates.IN_AIR
 
@@ -284,14 +274,18 @@ func process_movement_state(delta) -> void:
 			ground_move(delta)
 		MovementStates.IN_AIR:
 			air_move(delta)
+		MovementStates.WALL_RUN:
+			wall_run(delta)
+		
 
 func ground_move(delta: float) -> void:
 	is_momentum_preserved = false
+	already_air_jumped = false
 	
 	# Stick to slopes and stuff.
 	gravity_vector = -get_floor_normal()
 	
-	if Input.is_action_pressed("jump"):
+	if Input.is_action_just_pressed("jump"):
 		# TODO: reset momentum somehow
 		jump()
 	
@@ -328,44 +322,14 @@ func ground_move(delta: float) -> void:
 	velocity.y = gravity_vector.y
 	
 	move_and_slide()
-
-func wait(t):
-	await get_tree().create_timer(t).timeout
 	
-
-#to reset to make sure you dont crouch to crouch sldie
-func can_crouch_slide():
-	if Input.is_action_pressed("crouch") and not Input.is_action_pressed("sprint"):
-		ready_to_crouch_slide = false
-		
-
-func crouchin_sliding():
-	if Input.is_action_pressed("crouch") and Input.is_action_pressed("sprint"):
-		return true
-#	var temp_var = false
-#	if Input.is_action_pressed("sprint") and not Input.is_action_pressed("crouch"):
-#		temp_var = ready_to_crouch_slide
-#		if temp_var == ready_to_crouch_slide:
-#			if Input.is_action_pressed("sprint") and Input.is_action_pressed("crouch"):
-#				return true
-
-func handle_crouching() -> void:
 	
-	# Change colliders when crouching TODO explain
-	# Head movement is 
-	if Input.is_action_pressed("crouch") or is_head_bonked:
-		current_collider_height -= CROUCH_TRANSITION_SPEED
-		#head.translation = head.translation.linear_interpolate(Vector3(0, 1.25, 0), CROUCH_TRANSITION_SPEED)
-	else:
-		current_collider_height += CROUCH_TRANSITION_SPEED
-		#head.translation = head.translation.linear_interpolate(Vector3(0, 1.8, 0), CROUCH_TRANSITION_SPEED)
-	
-	# Crouch and regular height determine the shortest and highest we can stand, respectively.
-	current_collider_height = clamp(current_collider_height, COLLIDER_CROUCH_HEIGHT, COLLIDER_REGULAR_HEIGHT)
-	
-	collider.shape.height = current_collider_height
-
 func air_move(delta) -> void:
+	if already_air_jumped == false:
+		if Input.is_action_just_pressed("jump"):
+			jump()
+			already_air_jumped = true
+	
 	gravity_vector += Vector3.DOWN * GRAVITY * (delta / 2) # Fall to the ground.
 	
 	# Makes the player slow down or speed up, depending on what they hit.
@@ -397,10 +361,68 @@ func air_move(delta) -> void:
 	
 	move_and_slide()
 
+func wall_run(delta):
+	if already_air_jumped == false:
+		if Input.is_action_just_pressed("jump"):
+			jump()
+			already_air_jumped = true
+	
+	gravity_vector += Vector3.DOWN * 0# Fall to the ground.
+	
+	# Makes the player slow down or speed up, depending on what they hit.
+	var realv = get_real_velocity()
+	horizontal_velocity.x = realv.x
+	horizontal_velocity.z = realv.z
+	
+	# Get the velocity over ground from when we jumped / became airborne.
+	if not is_momentum_preserved:
+		original_horizontal_velocity = horizontal_velocity
+		is_momentum_preserved = true
+	
+	offset_velocity = direction / 2
+	
+	horizontal_velocity = horizontal_velocity + offset_velocity
+	
+	if original_horizontal_velocity.length() <= WALK_SPEED:
+		horizontal_velocity = clamp_vector(horizontal_velocity, WALK_SPEED)
+	else:
+		horizontal_velocity = clamp_vector(horizontal_velocity, original_horizontal_velocity.length())
+	
+	# Movement vector calculated from horizontal direction and gravity.
+	movement.z = horizontal_velocity.z + gravity_vector.z
+	movement.x = horizontal_velocity.x + gravity_vector.x
+	movement.y = gravity_vector.y * 0
+	
+	# Final velocity calculated from movement.
+	set_velocity(movement)
+	
+	move_and_slide()
 
-			
+#to reset to make sure you dont crouch to crouch sldie
+func can_crouch_slide():
+	if Input.is_action_pressed("crouch") and not Input.is_action_pressed("sprint"):
+		ready_to_crouch_slide = false
+		
 
+func crouchin_sliding():
+	if Input.is_action_pressed("crouch") and Input.is_action_pressed("sprint"):
+		return true
 
+func handle_crouching() -> void:
+	
+	# Change colliders when crouching TODO explain
+	# Head movement is 
+	if Input.is_action_pressed("crouch") or is_head_bonked:
+		current_collider_height -= CROUCH_TRANSITION_SPEED
+		#head.translation = head.translation.linear_interpolate(Vector3(0, 1.25, 0), CROUCH_TRANSITION_SPEED)
+	else:
+		current_collider_height += CROUCH_TRANSITION_SPEED
+		#head.translation = head.translation.linear_interpolate(Vector3(0, 1.8, 0), CROUCH_TRANSITION_SPEED)
+	
+	# Crouch and regular height determine the shortest and highest we can stand, respectively.
+	current_collider_height = clamp(current_collider_height, COLLIDER_CROUCH_HEIGHT, COLLIDER_REGULAR_HEIGHT)
+	
+	collider.shape.height = current_collider_height
 
 
 func jump():
@@ -413,7 +435,8 @@ func clamp_vector(vector: Vector3, clamp_length: float) -> Vector3:
 		return vector
 	return vector * (clamp_length / vector.length())
 
-func _on_projectile_fired(item_data, projectile_transform):
+func _on_projectile_fired(item_data):
+	
 	ui.update_ammo(item_data)
 	process_recoil()
 	
@@ -438,7 +461,7 @@ func not_scope():
 
 
 func load_difficulty():
-	var file = FileAccess.open(EventBus.savelocation + "save.txt", FileAccess.READ)
+	var file = FileAccess.open("user://" + "save.txt", FileAccess.READ)
 	difficulty = int(file.get_as_text(true))
 	if difficulty == 1:
 		recoil_difficulty = 0.5
@@ -446,6 +469,10 @@ func load_difficulty():
 		recoil_difficulty = 1
 	elif difficulty == 3:
 		recoil_difficulty = 1.5
+		
+
+func ammo_box_pickup():
+	item_manager.add_ammo()
 
 
 

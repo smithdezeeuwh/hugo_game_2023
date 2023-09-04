@@ -16,7 +16,7 @@ var impact_effects = []
 
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	EventBus.projectile_fired.connect(_on_projectile_fired)
+	pass
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(_delta: float) -> void:
@@ -25,14 +25,15 @@ func _process(_delta: float) -> void:
 func _physics_process(delta: float) -> void:
 	process_projectiles(delta)
 
-func _on_projectile_fired(item_data: ItemData, projectile_transform: Transform3D):
+func _on_projectile_fired(item_data: ItemData, projectile_transform: Transform3D, is_fired_by_enemy: bool = false):
 	var new_projectile = instantiate_node(item_data.projectile_scene, projectile_transform)
 	new_projectile.transform = projectile_transform
 	new_projectile.is_active = true
+	new_projectile.is_fired_by_enemy = is_fired_by_enemy
 	new_projectile.speed = item_data.projectile_speed
 	new_projectile.damage = item_data.damage
-	
 	projectiles.append(new_projectile)
+	
 
 func process_projectiles(delta):
 	for bullet in projectiles:
@@ -62,8 +63,7 @@ func process_projectiles(delta):
 			# Check if we hit an enemy, then damage them. Spawn the correct impact effect.
 			if hit.is_in_group("Enemy"):
 				#hit.damage(bullet.damage)
-				print("hit enemy")
-				hit.got_hit()
+				hit.damage(20)
 
 				#impact_effects.append(new_impact)
 				var impact_transform = Transform3D(Basis(), collision.position)
@@ -73,7 +73,6 @@ func process_projectiles(delta):
 
 				impact_effects.append(new_impact)
 			else:
-				print("hit not enemy")
 				#var impact_transform = Transform3D(collision.normal, collision.position)
 				var impact_transform = Transform3D(Basis(), collision.position)
 				

@@ -14,6 +14,15 @@ var item_index: int = 1 # For switching items via scroll wheel, which requires a
 var is_changing_item: bool = true
 var pickup_item_data: ItemData
 
+#WEAPON SWAY VARIBLES
+var mouse_mov
+var sway_threshold = 5
+var sway_lerp = 5
+@export var sway_left : Vector3
+@export var sway_right : Vector3
+@export var sway_normal : Vector3
+
+
 @onready var all_items: Dictionary = {
 	"AK-74U":$ak_74u,
 	"PKM":$pkm,
@@ -38,6 +47,7 @@ func _ready() -> void:
 	
 func _physics_process(delta: float) -> void:
 	ADS(delta)
+	player._on_update_player_ui(items[current_item_slot].item_data)
 
 func set_item(item: String, slot: String = current_item_slot) -> void:
 	items[slot].hide()
@@ -52,7 +62,13 @@ func set_item(item: String, slot: String = current_item_slot) -> void:
 	items[slot] = all_items[pickup_item_data.item_name]
 	items[slot].item_data = pickup_item_data
 	set_current_item(slot)
+	player._on_update_player_ui(items[slot].item_data)
 	
+	items[slot].bullet_fired.connect(_update_player_stuff)
+	
+func _update_player_stuff():
+	pass
+	#player.upd call players funcs here
 
 func get_item():
 	pass
@@ -146,8 +162,9 @@ func set_current_item(item_slot: String):
 
 	current_item_slot = item_slot
 	request_action("equip")
+	
 
-	EventBus.update_player_ui.emit(items[current_item_slot].item_data)
+
 
 # Scroll item change.
 func update_item_index():
@@ -188,18 +205,15 @@ func get_y_recoil():
 
 
 
-var mouse_mov
-var sway_threshold = 5
-var sway_lerp = 5
-@export var sway_left : Vector3
-@export var sway_right : Vector3
-@export var sway_normal : Vector3
 
+#WEAPON SWAY
 
+# detect mouse input
 func _input(event):
 	if event is InputEventMouseMotion:
 		mouse_mov = -event.relative.x
-	
+
+#processes sway
 func _process(delta):
 	if ! is_ADS:
 		if mouse_mov != null:
@@ -210,3 +224,11 @@ func _process(delta):
 			else:
 				rotation = rotation.lerp(sway_normal, sway_lerp * delta)
 
+
+func add_ammo():
+	print("googoo gaga")
+
+func _on_body_entered(body):
+	if body.is_in_group("pickup"):
+		pickup_item_data = body.get_item_pickup_data()
+		set_current_item(pickup_item_data.item_name)
