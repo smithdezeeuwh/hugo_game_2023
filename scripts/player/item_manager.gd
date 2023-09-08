@@ -177,7 +177,7 @@ func update_item_index():
 			item_index = 2
 		"Grenade":
 			item_index = 3
-
+#takes ammo from picked up weapon
 func pickup_ammo(new_item_data):
 	items[current_item_slot].item_data.current_clip_ammo = new_item_data.current_clip_ammo
 # Searches for item pickups, and based on player input executes further tasks
@@ -227,7 +227,7 @@ func _process(delta):
 
 func add_ammo():
 	print("googoo gaga")
-
+#test func for weapon pick up trial
 func _on_body_entered(body):
 	if body.is_in_group("pickup"):
 		pickup_item_data = body.get_item_pickup_data()

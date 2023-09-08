@@ -325,7 +325,7 @@ func ground_move(delta: float) -> void:
 	
 	
 func air_move(delta) -> void:
-	if already_air_jumped == false:
+	if already_air_jumped == true:
 		if Input.is_action_just_pressed("jump"):
 			jump()
 			already_air_jumped = true
@@ -374,7 +374,7 @@ func wall_run(delta):
 	horizontal_velocity.x = realv.x
 	horizontal_velocity.z = realv.z
 	
-	# Get the velocity over ground from when we jumped / became airborne.
+	# Get the velocity over ground from when we jumped / became airborne.ww
 	if not is_momentum_preserved:
 		original_horizontal_velocity = horizontal_velocity
 		is_momentum_preserved = true
