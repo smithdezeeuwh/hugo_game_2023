@@ -9,6 +9,9 @@ var difficulty_from_load:int = 0
 
 func _ready():
 	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+	var file = FileAccess.open("user://" + "save.txt", FileAccess.WRITE)
+	#saves difficulty for use in game scene
+	file.store_string(str(1))
 
 func _on_button_play_pressed():
 	get_tree().change_scene_to_file("res://scenes/world.tscn")
